@@ -1,8 +1,7 @@
 services:
   # 1. Frontend Shop (Static Site)
-  - type: web
+  - type: static
     name: han-bakery-shop
-    runtime: static
     buildCommand: npm install && npm run build
     publishPath: dist
     envVars:
