@@ -15,6 +15,7 @@ services:
   - type: web
     name: han-bakery-vnpay
     runtime: node
+    plan: free
     buildCommand: cd vnpay/vnpay && npm install
     startCommand: cd vnpay/vnpay && node server.js
     envVars:
