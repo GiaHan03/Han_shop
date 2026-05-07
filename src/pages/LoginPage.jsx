@@ -73,7 +73,7 @@ const LoginPage = ({ onLoginSuccess }) => {
           </div>
 
           <div style={{ textAlign: 'right', marginBottom: '2rem' }}>
-            <a href="#" style={{ fontSize: '0.85rem', color: 'var(--primary)', textDecoration: 'none', fontWeight: 600 }}>Quên mật khẩu?</a>
+            <a href="#!" onClick={(e) => e.preventDefault()} style={{ fontSize: '0.85rem', color: 'var(--primary)', textDecoration: 'none', fontWeight: 600 }}>Quên mật khẩu?</a>
           </div>
 
           <button type="submit" disabled={loading} className="cart-btn" style={{ width: '100%', padding: '1.2rem', fontSize: '1.1rem', justifyContent: 'center' }}>

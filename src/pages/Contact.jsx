@@ -60,9 +60,9 @@ const Contact = () => {
           <div style={{ marginTop: '4rem' }}>
             <h4 style={{ marginBottom: '1.5rem' }}>Theo dõi chúng tôi</h4>
             <div style={{ display: 'flex', gap: '1.5rem' }}>
-              <a href="#" style={{ color: 'var(--primary)' }}><Instagram size={28} /></a>
-              <a href="#" style={{ color: 'var(--primary)' }}><Facebook size={28} /></a>
-              <a href="#" style={{ color: 'var(--primary)' }}><Twitter size={28} /></a>
+              <a href="#!" onClick={(e) => e.preventDefault()} style={{ color: 'var(--primary)' }}><Instagram size={28} /></a>
+              <a href="#!" onClick={(e) => e.preventDefault()} style={{ color: 'var(--primary)' }}><Facebook size={28} /></a>
+              <a href="#!" onClick={(e) => e.preventDefault()} style={{ color: 'var(--primary)' }}><Twitter size={28} /></a>
             </div>
           </div>
         </div>

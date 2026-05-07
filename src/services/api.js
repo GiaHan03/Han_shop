@@ -33,7 +33,20 @@ export const api = {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(orderData),
     }).then(handleResponse),
-    getByCustomer: (customerId) => fetch(`${API_BASE_URL}/order/customer/${customerId}`).then(handleResponse),
+    getByCustomer: async (customerId) => {
+      const allOrders = await fetch(`${API_BASE_URL}/order`).then(handleResponse);
+      return allOrders.filter(o => (o.customerId || o.CustomerId) === parseInt(customerId));
+    },
+    updateStatus: (id, status) => fetch(`${API_BASE_URL}/order/${id}/status`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(status),
+    }).then(handleResponse),
+    updatePayment: (id, status) => fetch(`${API_BASE_URL}/order/${id}/payment`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(status),
+    }).then(handleResponse),
   },
   customers: {
     create: (data) => fetch(`${API_BASE_URL}/customer`, {

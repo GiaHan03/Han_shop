@@ -3,7 +3,7 @@ import { api } from '../services/api';
 import { Package, Calendar, CreditCard, ChevronRight, ShoppingBag, Clock, CheckCircle, XCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
-const Orders = ({ user }) => {
+const Orders = ({ user, allProducts }) => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -113,7 +113,14 @@ const Orders = ({ user }) => {
                           <Calendar size={16} />
                           {new Date(order.ngayBan).toLocaleDateString('vi-VN')}
                         </span>
-                        <span style={{ fontSize: '0.9rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <span style={{ 
+                          fontSize: '0.9rem', 
+                          display: 'flex', 
+                          alignItems: 'center', 
+                          gap: '0.5rem',
+                          color: order.paymentStatus === 'Paid' ? '#10b981' : '#ef4444',
+                          fontWeight: 700
+                        }}>
                           <CreditCard size={16} />
                           {order.paymentStatus === 'Paid' ? 'Đã thanh toán' : 'Chưa thanh toán'}
                         </span>
@@ -139,23 +146,46 @@ const Orders = ({ user }) => {
                   </div>
                 </div>
 
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', borderTop: '1px solid #f1f5f9', paddingTop: '1.5rem' }}>
-                   <div style={{ display: 'flex', gap: '0.5rem' }}>
-                      {/* Show preview of items if available */}
-                      {order.orderDetails?.slice(0, 3).map((item, idx) => (
-                        <div key={idx} style={{ width: '45px', height: '45px', borderRadius: '0.8rem', background: '#f8fafc', border: '1px solid #f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.7rem', fontWeight: 700 }}>
-                          x{item.soLuong}
-                        </div>
-                      ))}
-                      {order.orderDetails?.length > 3 && (
-                        <div style={{ padding: '0.8rem', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                          +{order.orderDetails.length - 3} món khác
-                        </div>
-                      )}
+                <div style={{ padding: '1.5rem 0', borderTop: '1px solid #f1f5f9', borderBottom: '1px solid #f1f5f9' }}>
+                   <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                      {order.orderDetails?.map((item, idx) => {
+                        // Tìm thông tin sản phẩm từ allProducts nếu item.product bị null
+                        const productInfo = item.product || allProducts?.find(p => p.productId === item.productId);
+                        
+                        return (
+                          <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                            <img 
+                              src={productInfo?.hinhAnh || 'https://via.placeholder.com/60'} 
+                              alt={productInfo?.tenBanh}
+                              style={{ 
+                                width: '60px', 
+                                height: '60px', 
+                                borderRadius: '1rem', 
+                                objectFit: 'cover',
+                                border: '1px solid #f1f5f9'
+                              }} 
+                            />
+                            <div style={{ flex: 1 }}>
+                              <h4 style={{ fontSize: '1rem', fontWeight: 600, marginBottom: '0.2rem' }}>
+                                {productInfo?.tenBanh || `Sản phẩm #${item.productId}`}
+                              </h4>
+                              <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+                                {item.soLuong} x {item.gia.toLocaleString()}đ
+                              </p>
+                            </div>
+                            <div style={{ textAlign: 'right', fontWeight: 700 }}>
+                              {(item.soLuong * item.gia).toLocaleString()}đ
+                            </div>
+                          </div>
+                        );
+                      })}
                    </div>
+                </div>
+
+                <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', paddingTop: '1.5rem' }}>
                    <div style={{ textAlign: 'right' }}>
                       <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', marginBottom: '0.2rem' }}>Tổng thanh toán</p>
-                      <p style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--primary)' }}>{order.tongTien.toLocaleString()}đ</p>
+                      <p style={{ fontSize: '1.8rem', fontWeight: 800, color: 'var(--primary)' }}>{order.tongTien.toLocaleString()}đ</p>
                    </div>
                 </div>
               </div>

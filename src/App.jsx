@@ -35,6 +35,10 @@ function AppContent() {
     const saved = localStorage.getItem('bakery-user');
     return saved ? JSON.parse(saved) : null;
   });
+  const clearCart = () => {
+    setCart([]);
+    localStorage.removeItem('bakery-cart');
+  };
   const [loading, setLoading] = useState(true);
   const [checkoutStep, setCheckoutStep] = useState(1);
   const [paymentMethod, setPaymentMethod] = useState('COD');
@@ -83,8 +87,17 @@ function AppContent() {
   }, [user]);
 
   const addToCart = (product) => {
+    if (product.soLuong !== undefined && product.soLuong <= 0) {
+      alert('Sản phẩm này hiện không còn tồn kho.');
+      return;
+    }
     const existing = cart.find(item => item.productId === product.productId);
     if (existing) {
+      // Kiểm tra xem nếu cộng thêm 1 có vượt quá tồn kho không
+      if (product.soLuong !== undefined && existing.quantity + 1 > product.soLuong) {
+        alert(`Rất tiếc, chỉ còn ${product.soLuong} sản phẩm trong kho.`);
+        return;
+      }
       setCart(cart.map(item => item.productId === product.productId ? { ...item, quantity: item.quantity + 1 } : item));
     } else {
       setCart([...cart, { ...product, quantity: 1 }]);
@@ -100,6 +113,11 @@ function AppContent() {
     setCart(cart.map(item => {
       if (item.productId === id) {
         const newQty = Math.max(1, item.quantity + delta);
+        // Kiểm tra tồn kho khi tăng số lượng
+        if (delta > 0 && item.soLuong !== undefined && newQty > item.soLuong) {
+          alert(`Rất tiếc, chỉ còn ${item.soLuong} sản phẩm trong kho.`);
+          return item;
+        }
         return { ...item, quantity: newQty };
       }
       return item;
@@ -131,20 +149,35 @@ function AppContent() {
       return;
     }
 
+    // Kiểm tra tồn kho trước khi gửi order
+    const outOfStockItems = cart.filter(item => {
+      return item.soLuong !== undefined && item.soLuong < item.quantity;
+    });
+    if (outOfStockItems.length > 0) {
+      const names = outOfStockItems.map(i => i.tenBanh || i.productId).join(', ');
+      alert('Các sản phẩm sau không đủ tồn kho: ' + names);
+      return;
+    }
+
     try {
-      console.log('Step 1: Creating/Verifying customer...');
-      // Use camelCase to match standard .NET JSON behavior
-      const customer = await api.customers.create({
-        ten: customerInfo.ten,
-        soDienThoai: customerInfo.soDienThoai,
-        diaChi: customerInfo.diaChi
-      });
-      
-      console.log('Customer API Response:', customer);
-      const cid = customer.customerId || customer.CustomerId;
+      let cid;
+      // Nếu đã đăng nhập, dùng luôn customerId của user, không tạo mới
+      if (user && (user.customerId || user.CustomerId)) {
+        cid = user.customerId || user.CustomerId;
+        console.log('Step 1: Using existing customer ID:', cid);
+      } else {
+        console.log('Step 1: Creating/Verifying customer...');
+        const customer = await api.customers.create({
+          ten: customerInfo.ten,
+          soDienThoai: customerInfo.soDienThoai,
+          diaChi: customerInfo.diaChi
+        });
+        console.log('Customer API Response:', customer);
+        setUser(customer); // store new customer for future use
+        cid = customer.customerId || customer.CustomerId;
+      }
       
       if (!cid) {
-        console.error('Failed to get CustomerId from response:', customer);
         throw new Error('Không lấy được ID khách hàng từ hệ thống.');
       }
 
@@ -256,8 +289,8 @@ function AppContent() {
           <Route path="/contact" element={<Contact />} />
           <Route path="/login" element={<LoginPage onLoginSuccess={setUser} />} />
           <Route path="/register" element={<RegisterPage />} />
-          <Route path="/payment-callback" element={<PaymentCallback />} />
-          <Route path="/orders" element={<Orders user={user} />} />
+          <Route path="/payment-callback" element={<PaymentCallback clearCart={clearCart} />} />
+          <Route path="/orders" element={<Orders user={user} allProducts={products} />} />
           <Route path="/profile" element={<Profile user={user} onUpdateUser={setUser} />} />
         </Routes>
       </Layout>

@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { CheckCircle, XCircle, ChevronRight, Package, Calendar, CreditCard } from 'lucide-react';
+import { api } from '../services/api';
 
-const PaymentCallback = () => {
+const PaymentCallback = ({ clearCart }) => {
   const [searchParams] = useSearchParams();
   const [status, setStatus] = useState('loading');
   const [orderDetails, setOrderDetails] = useState(null);
@@ -16,6 +17,13 @@ const PaymentCallback = () => {
 
     if (responseCode === '00') {
       setStatus('success');
+      if (clearCart) clearCart();
+      // Update payment status in backend
+      if (txnRef) {
+        api.orders.updatePayment(txnRef, 'Paid').catch(err => {
+          console.error('Failed to update payment status:', err);
+        });
+      }
     } else {
       setStatus('failed');
     }
@@ -129,8 +137,8 @@ const PaymentCallback = () => {
         )}
 
         <div style={{ display: 'flex', gap: '1rem' }}>
-          <Link to="/" className="cart-btn" style={{ flex: 1, justifyContent: 'center', padding: '1.2rem' }}>
-            Quay về trang chủ
+          <Link to="/orders" className="cart-btn" style={{ flex: 1, justifyContent: 'center', padding: '1.2rem' }}>
+            Xem đơn hàng của tôi
           </Link>
           {status === 'failed' && (
             <Link to="/cart" className="btn" style={{ 
