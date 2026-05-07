@@ -1,9 +1,10 @@
 services:
-  # 1. Frontend Shop (Static Site)
-  - type: static
+  # 1. Frontend Shop (Static site)
+  - type: web
     name: han-bakery-shop
+    env: static
     buildCommand: npm install && npm run build
-    publishPath: dist
+    staticPublishPath: dist
     envVars:
       - key: VITE_API_BASE_URL
         value: https://your-backend-url.onrender.com/api
