@@ -1,0 +1,24 @@
+services:
+  # 1. Frontend Shop (Static Site)
+  - type: web
+    name: han-bakery-shop
+    runtime: static
+    buildCommand: npm install && npm run build
+    publishPath: dist
+    envVars:
+      - key: VITE_API_BASE_URL
+        value: https://your-backend-url.onrender.com/api
+      - key: VITE_VNPAY_API_URL
+        value: https://han-bakery-vnpay.onrender.com
+
+  # 2. VNPay Proxy (Web Service)
+  - type: web
+    name: han-bakery-vnpay
+    runtime: node
+    buildCommand: cd vnpay/vnpay && npm install
+    startCommand: cd vnpay/vnpay && node server.js
+    envVars:
+      - key: VNP_TMN_CODE
+        sync: false
+      - key: VNP_HASH_SECRET
+        sync: false
